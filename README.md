@@ -7,6 +7,20 @@ Throughput, latency and quality benchmarks for an LLM served over an OpenAI-comp
 
 Both are plain HTTP clients, so they run on any OS and don't need a GPU on the machine running them. The server can be anywhere you can reach.
 
+## How it measures
+
+**`bench.py`** is a custom load generator built only from the Python standard library. It doesn't wrap vLLM's `benchmark_serving`, GenAI-Perf, llmperf or locust.
+- `urllib` sends streaming chat requests and the script parses the SSE stream itself.
+- `ThreadPoolExecutor` runs concurrent requests.
+- `time.perf_counter` gives client-side TTFT and end-to-end time.
+- Prefill/decode speed and MTP acceptance come from the timing stats TensorFold adds to its final stream chunk.
+- `csv` and `statistics` write the rows and compute medians/p90.
+
+**`quality.sh`** runs EleutherAI's [lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) (`lm_eval`) in `local-chat-completions` mode against your server's API.
+- `gsm8k_cot_zeroshot`: grade-school math word problems, solved step by step.
+- `ifeval`: whether the model follows verifiable formatting instructions ("use no commas", "answer in 3 bullets").
+- `langdetect`, `immutabledict` and `nltk` are only there because IFEval's scorer needs them.
+
 ## Server requirements
 
 The scripts were written for **TensorFold** and use a few of its extensions on top of the OpenAI API:
