@@ -7,8 +7,6 @@ Throughput, latency and quality benchmarks for an LLM served over an OpenAI-comp
 
 Both are plain HTTP clients, so they run on any OS and don't need a GPU on the machine running them. The server can be anywhere you can reach.
 
-`results.csv` holds reference results for GLM-5.3-Flash-EXL3 on 2× NVIDIA DGX Spark with the TensorFold server.
-
 ## Server requirements
 
 The scripts were written for **TensorFold** and use a few of its extensions on top of the OpenAI API:
@@ -56,7 +54,7 @@ python3 bench.py --preset long       # opt-in: 256k / 512k / 1M prompts (needs a
 
 Options: `--url`, `--reps N` (default 3), `--csv FILE` (default `results.csv`).
 
-Each request is appended as one row to the CSV, and a median/p90 summary per scenario is printed at the end. Use `--csv mine.csv` to keep your runs separate from the reference results.
+Each request is appended as one row to the CSV, and a median/p90 summary per scenario is printed at the end.
 
 Key columns:
 
@@ -73,7 +71,7 @@ Notes:
 - `quick`, `prefill` and `cache` set `ignore_eos` so every request generates a fixed number of tokens.
 - Each prompt gets a unique random prefix, so nothing hits the prefix cache by accident, except the warm half of `cache`.
 - In warm `cache` rows, `prefill_tps` counts cached tokens too, so it's inflated. Compare `ttft_s` and `cached_tok` instead.
-- Concurrency 8 is above the reference server's 4 slots, so it measures queueing. Adjust the levels in `cells()` for your server.
+- Concurrency 8 is above the 4 slots of the server it was written for, so it measures queueing. Adjust the levels in `cells()` for your server.
 
 ## Quality: `quality.sh`
 
